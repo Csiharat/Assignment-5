@@ -3,9 +3,8 @@ from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 
 from .models import models, schemas
-from .controllers import orders
+from .controllers import orders, sandwiches, recipes, order_details, resources
 from .dependencies.database import engine, get_db
-from .models.schemas import Sandwich
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -47,7 +46,6 @@ def update_one_order(order_id: int, order: schemas.OrderUpdate, db: Session = De
         raise HTTPException(status_code=404, detail="User not found")
     return orders.update(db=db, order=order, order_id=order_id)
 
-
 @app.delete("/orders/{order_id}", tags=["Orders"])
 def delete_one_order(order_id: int, db: Session = Depends(get_db)):
     order = orders.read_one(db, order_id=order_id)
@@ -55,19 +53,22 @@ def delete_one_order(order_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
     return orders.delete(db=db, order_id=order_id)
 
-@app.post("/sandwiches/", response_model=schemas.Order, tags=["Sandwiches"])
+
+# SANDWICH
+
+@app.post("/sandwiches/", response_model=schemas.Sandwich, tags=["Sandwiches"])
 def create_sandwich(sandwich: schemas.SandwichCreate, db: Session = Depends(get_db)):
-    return sandwich.create(db=db, sandwich=sandwich)
+    return sandwiches.create(db=db, sandwich=sandwich)
 
 
 @app.get("/sandwiches/", response_model=list[schemas.Sandwich], tags=["Sandwiches"])
 def read_sandwiches(db: Session = Depends(get_db)):
-    return Sandwich.read_all(db)
+    return sandwiches.read_all(db)
 
 
 @app.get("/sandwiches/{sandwich_id}", response_model=schemas.Sandwich, tags=["Sandwiches"])
-def read_one_order(sandwich_id: int, db: Session = Depends(get_db)):
-    sandwich = Sandwich.read_one(db, sandwich_id=sandwich_id)
+def read_one_sandwich(sandwich_id: int, db: Session = Depends(get_db)):
+    sandwich = sandwiches.read_one(db, sandwich_id=sandwich_id)
     if sandwich is None:
         raise HTTPException(status_code=404, detail="User not found")
     return sandwich
@@ -75,19 +76,123 @@ def read_one_order(sandwich_id: int, db: Session = Depends(get_db)):
 
 @app.put("/sandwiches/{sandwich_id}", response_model=schemas.Sandwich, tags=["Sandwiches"])
 def update_one_sandwich(sandwich_id: int, sandwich: schemas.SandwichUpdate, db: Session = Depends(get_db)):
-    sandwich_db = Sandwich.read_one(db, sandwich_id=sandwich_id)
+    sandwich_db = sandwiches.read_one(db, sandwich_id=sandwich_id)
     if sandwich_db is None:
         raise HTTPException(status_code=404, detail="User not found")
-    return Sandwich.update(db=db, sandwich=sandwich, sandwich_id=sandwich_id)
+    return sandwiches.update(db=db, sandwich=sandwich, sandwich_id=sandwich_id)
 
-
-@app.delete("sandwiches/{sandwich_id}", tags=["Sandwiches"])
-def delete_one_order(sandwich_id: int, db: Session = Depends(get_db)):
-    sandwich = Sandwich.read_one(db, sandwich_id=sandwich_id)
+@app.delete("/sandwiches/{sandwich_id}", tags=["Sandwiches"])
+def delete_one_sandwich(sandwich_id: int, db: Session = Depends(get_db)):
+    sandwich = sandwiches.read_one(db, sandwich_id=sandwich_id)
     if sandwich is None:
         raise HTTPException(status_code=404, detail="User not found")
-    return Sandwich.delete(db=db, sandwich_id=sandwich_id)
+    return sandwiches.delete(db=db, sandwich_id=sandwich_id)
+
+
+# RECIPIES
+
+@app.post("/recipes/", response_model=schemas.Recipe, tags=["Recipes"])
+def create_recipe(recipe: schemas.RecipeCreate, db: Session = Depends(get_db)):
+    return recipes.create(db=db, recipe=recipe)
+
+
+@app.get("/recipes/", response_model=list[schemas.Recipe], tags=["Recipes"])
+def read_recipes(db: Session = Depends(get_db)):
+    return recipes.read_all(db)
+
+
+@app.get("/recipes/{Recipe_id}", response_model=schemas.Recipe, tags=["Recipes"])
+def read_one_recipe(recipe_id: int, db: Session = Depends(get_db)):
+    recipe = recipes.read_one(db, recipe_id=recipe_id)
+    if recipe is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return recipes
+
+
+@app.put("/recipes/{Recipe_id}", response_model=schemas.Recipe, tags=["Recipes"])
+def update_one_recipe(recipe_id: int, recipe: schemas.RecipeUpdate, db: Session = Depends(get_db)):
+    Recipe_db = recipes.read_one(db, recipe_id=recipe_id)
+    if Recipe_db is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return recipes.update(db=db, recipe=recipe, recipe_id=recipe_id)
+
+
+@app.delete("/recipes/{Recipe_id}", tags=["Recipes"])
+def delete_one_recipe(recipe_id: int, db: Session = Depends(get_db)):
+    recipe = recipes.read_one(db, recipe_id=recipe_id)
+    if recipe is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return recipes.delete(db=db, recipe_id=recipe_id)
+
+
+# RESOURCES
+
+@app.post("/resources/", response_model=schemas.Resource, tags=["Resources"])
+def create_resource(resource: schemas.ResourceCreate, db: Session = Depends(get_db)):
+    return resources.create(db=db, resource=resource)
+
+
+@app.get("/resources/", response_model=list[schemas.Resource], tags=["Resources"])
+def read_resources(db: Session = Depends(get_db)):
+    return resources.read_all(db)
+
+
+@app.get("/resources/{Resource_id}", response_model=schemas.Resource, tags=["Resources"])
+def read_one_resource(resource_id: int, db: Session = Depends(get_db)):
+    resource = resources.read_one(db, resource_id=resource_id)
+    if resource is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return resource
+
+
+@app.put("/resources/{Resource_id}", response_model=schemas.Resource, tags=["Resources"])
+def update_one_resource(resource_id: int, resource: schemas.ResourceUpdate, db: Session = Depends(get_db)):
+    Resource_db = resources.read_one(db, resource_id=resource_id)
+    if Resource_db is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return resources.update(db=db, resource=resource, resource_id=resource_id)
 
 
 
+@app.delete("/resources/{Resource_id}", tags=["Resources"])
+def delete_one_resource(resource_id: int, db: Session = Depends(get_db)):
+    resource = resources.read_one(db, resource_id=resource_id)
+    if resource is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return resources.delete(db=db, resource_id=resource_id)
+
+
+#ORDER DETAILS
+
+@app.post("/order_details/", response_model=schemas.OrderDetail, tags=["Order Details"])
+def create_order_details(order: schemas.OrderDetailCreate, db: Session = Depends(get_db)):
+    return order_details.create(db=db, order_detail=order)
+
+
+@app.get("/order_details/", response_model=list[schemas.OrderDetail], tags=["Order Details"])
+def read_orders_details(db: Session = Depends(get_db)):
+    return order_details.read_all(db)
+
+
+@app.get("/order_details/{order_detail_id}", response_model=schemas.OrderDetail, tags=["Order Details"])
+def read_one_order_details(order_detail_id: int, db: Session = Depends(get_db)):
+    order_detail = order_details.read_one(db, order_detail_id=order_detail_id)
+    if order_detail is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return order_details
+
+
+@app.put("/order_details/{order_detail_id}", response_model=schemas.OrderDetail, tags=["Order Details"])
+def update_one_order_details(order_detail_id: int, order_detail: schemas.OrderDetailUpdate, db: Session = Depends(get_db)):
+    order_detail_db = order_details.read_one(db, order_detail_id=order_detail_id)
+    if order_detail_db is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return order_details.update(db=db, order_detail=order_detail, order_detail_id=order_detail_id)
+
+@app.delete("/order_details/{order_detail_id}", tags=["Order Details"])
+def delete_one_order_details(order_detail_id: int, db: Session = Depends(get_db)):
+    order_detail = order_details.read_one(db, order_detail_id=order_detail_id)
+    if order_detail is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return order_details.delete(db=db, order_detail_id=order_detail_id)
 

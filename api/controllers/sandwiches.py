@@ -3,11 +3,10 @@ from fastapi import HTTPException, status, Response, Depends
 from ..models import models, schemas
 
 
-def create(db: Session, request):
+def create(db: Session, sandwich):
     db_sandwich = models.Sandwich(
-        id=request.id,
-        sandwich_name=request.sandwich_name,
-        price=request.price
+        sandwich_name=sandwich.sandwich_name,
+        price=sandwich.price
     )
     db.add(db_sandwich)
     db.commit()
